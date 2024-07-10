@@ -4,6 +4,7 @@ module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'js'],
   testPathIgnorePatterns: ['tests/oauth4webapi'],
+  setupFilesAfterEnv: ['./tests/setup.ts'],
   coveragePathIgnorePatterns: [
     'tests/test-helpers.ts',
     'src/openid-client/oauth4webapi.ts',
