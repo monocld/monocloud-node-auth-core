@@ -119,7 +119,7 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
 );
 
 export const signInOptionsSchema: Joi.ObjectSchema<SignInOptions> = Joi.object({
-  returnUrl: stringOptional.uri({ relativeOnly: true }),
+  returnUrl: stringOptional.uri({ allowRelative: true }),
   authenticator: stringOptional,
   loginHint: stringOptional,
   register: boolOptional,
