@@ -16,6 +16,7 @@ export const DefaultOptions = {
     scope: 'openid profile email',
     response_type: 'code',
   },
+  groupsClaim: 'groups',
   session: {
     cookie: {
       httpOnly: true,

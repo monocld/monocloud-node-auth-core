@@ -1,3 +1,6 @@
+import { DefaultOptions } from '../options/defaults';
+import { MonoCloudUser } from '../types';
+
 export const toB64Url = (input: string) =>
   input.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
@@ -125,18 +128,6 @@ export const decryptData = async (data: string, secretKey: string) => {
   }
 };
 
-export const getAcrValues = (value?: string): string[] => {
-  if (typeof value !== 'string' || !value.trim()) {
-    return [];
-  }
-
-  return value
-    .trim()
-    .split(' ')
-    .map(x => x.trim())
-    .filter(x => x.length);
-};
-
 export const ensureLeadingSlash = (val?: string): string => {
   const v = val?.trim();
 
@@ -179,4 +170,38 @@ export const isSameHost = (url: string, urlToCheck: string) => {
   } catch {
     return false;
   }
+};
+
+export const isUserInGroup = (
+  user: MonoCloudUser,
+  groups: string[],
+  groupsClaim = DefaultOptions.groupsClaim
+): boolean => {
+  const userGroups = (user[groupsClaim] ?? []) as (
+    | string
+    | { id: string; name: string }
+  )[];
+
+  if (!Array.isArray(groups) || groups.length === 0) {
+    return true;
+  }
+
+  if (!Array.isArray(userGroups) || userGroups.length === 0) {
+    return false;
+  }
+
+  for (const expectedGroup of groups) {
+    const userInGroup = userGroups.some(
+      g =>
+        (typeof g === 'string' && g === expectedGroup) ||
+        (typeof g === 'object' &&
+          (g.id === expectedGroup || g.name === expectedGroup))
+    );
+
+    if (userInGroup) {
+      return userInGroup;
+    }
+  }
+
+  return false;
 };

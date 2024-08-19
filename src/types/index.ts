@@ -570,6 +570,13 @@ export interface MonoCloudTokens {
 }
 
 /**
+ * A function used to handle errors that occur during the signin, callback, signout and userinfo endpoint execution.
+ *
+ * @param error - Error occured during execution of the endpoint.
+ */
+type OnError = (error: Error) => Promise<any> | any;
+
+/**
  * Represents options for the sign-in handler.
  */
 export interface SignInOptions {
@@ -583,7 +590,7 @@ export interface SignInOptions {
   /**
    * The authenticator which will be used for authenticating the user.
    */
-  authenticator?: Authenticators;
+  authenticatorHint?: Authenticators;
 
   /**
    * A hint to the authentication system indicating the user's preferred login identifier.
@@ -599,6 +606,11 @@ export interface SignInOptions {
    * Additional authorization parameters to include in the authentication request.
    */
   authParams?: AuthorizationParameters;
+
+  /**
+   * A custom function to handle unexpected errors while signing in.
+   */
+  onError?: OnError;
 }
 
 /**
@@ -614,6 +626,11 @@ export interface CallbackOptions {
    * Additional authorization parameters to include in the callback request.
    */
   authParams?: AuthorizationParameters;
+
+  /**
+   * A custom function to handle unexpected errors while processing callback from MonoCloud.
+   */
+  onError?: OnError;
 }
 
 /**
@@ -624,6 +641,11 @@ export interface UserInfoOptions {
    * Determines whether to refetch the user information from the authentication service.
    */
   refresh?: boolean;
+
+  /**
+   * A custom function to handle unexpected errors while fetching userinfo.
+   */
+  onError?: OnError;
 }
 
 /**
@@ -645,6 +667,11 @@ export interface SignOutOptions {
    * Additional parameters to include in the sign-out request.
    */
   signOutParams?: EndSessionParameters;
+
+  /**
+   * A custom function to handle unexpected errors while signing out.
+   */
+  onError?: OnError;
 }
 
 /**
