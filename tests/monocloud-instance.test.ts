@@ -180,6 +180,18 @@ describe('MonoCloud Base Instance', () => {
         });
       });
 
+      it('should execute custom onError function if provided', async () => {
+        const instance = getConfiguredInstance();
+
+        const req = new TestReq({ cookies: {}, method: 'GET' });
+
+        const onError = jest.fn();
+
+        await instance.signIn(req, new TestRes({}), { onError });
+
+        expect(onError).toHaveBeenCalledTimes(1);
+      });
+
       it('should have the base path in the redirect uri', async () => {
         setupDiscovery({
           authorization_endpoint: 'https://op.example.com/authorize',
@@ -388,7 +400,7 @@ describe('MonoCloud Base Instance', () => {
         expect(search.audience).toBe('https://api.acme.com');
       });
 
-      it('should redirect with acr_values when authenticator is set', async () => {
+      it('should redirect with authenticator_hint when authenticator is set', async () => {
         setupDiscovery({
           authorization_endpoint: 'https://op.example.com/authorize',
         });
@@ -399,7 +411,7 @@ describe('MonoCloud Base Instance', () => {
         const res = new TestRes(cookies);
 
         await instance.signIn(req, res, {
-          authenticator: 'apple',
+          authenticatorHint: 'apple',
         });
 
         expect(res.res.statusCode).toBe(302);
@@ -416,7 +428,7 @@ describe('MonoCloud Base Instance', () => {
         expect(search.code_challenge.length).toBeGreaterThan(0);
         expect(search.nonce.length).toBeGreaterThan(0);
         expect(search.code_challenge_method).toBe('S256');
-        expect(search.acr_values).toBe('authenticator:apple');
+        expect(search.authenticator_hint).toBe('apple');
         expect(search.client_id).toBe('__test_client_id__');
         expect(search.response_type).toBe('code');
         expect(search.scope).toBe('openid profile read:customer');
@@ -426,7 +438,7 @@ describe('MonoCloud Base Instance', () => {
         expect(search.audience).toBe('https://api.acme.com');
       });
 
-      it('should pick up the authenticator from the request and auth params even if the authenticator is passed through options', async () => {
+      it('should pick up the authenticator from the request even if the authenticator is passed through options and auth params', async () => {
         setupDiscovery({
           authorization_endpoint: 'https://op.example.com/authorize',
         });
@@ -435,14 +447,14 @@ describe('MonoCloud Base Instance', () => {
         const cookies = {};
         const req = new TestReq({
           cookies,
-          query: { authenticator: 'gooooooogle' },
+          query: { authenticator_hint: 'thisshouldbepickedup' },
           method: 'GET',
         });
         const res = new TestRes(cookies);
 
         await instance.signIn(req, res, {
-          authenticator: 'apple',
-          authParams: { acr_values: 'authenticator:test' },
+          authenticatorHint: 'apple',
+          authParams: { authenticator_hint: 'params' },
         });
 
         expect(res.res.statusCode).toBe(302);
@@ -459,9 +471,7 @@ describe('MonoCloud Base Instance', () => {
         expect(search.code_challenge.length).toBeGreaterThan(0);
         expect(search.nonce.length).toBeGreaterThan(0);
         expect(search.code_challenge_method).toBe('S256');
-        expect(search.acr_values).toBe(
-          'authenticator:test authenticator:gooooooogle'
-        );
+        expect(search.authenticator_hint).toBe('thisshouldbepickedup');
         expect(search.client_id).toBe('__test_client_id__');
         expect(search.response_type).toBe('code');
         expect(search.scope).toBe('openid profile read:customer');
@@ -995,6 +1005,22 @@ describe('MonoCloud Base Instance', () => {
         await instance.callback(req, res);
 
         expect(res.res.redirectedUrl).toBe('https://example.org/basepath/');
+      });
+
+      it('should execute custom onError function if provided', async () => {
+        const instance = getConfiguredInstance();
+
+        const req = new TestReq({
+          cookies: {},
+          url: `/api/auth/callback?state=peace&code=code`,
+          method: 'GET',
+        });
+
+        const onError = jest.fn();
+
+        await instance.callback(req, new TestRes({}), { onError });
+
+        expect(onError).toHaveBeenCalledTimes(1);
       });
 
       it('should return internal server error error if state is not found', async () => {
@@ -1710,6 +1736,21 @@ describe('MonoCloud Base Instance', () => {
         });
       });
 
+      it('should execute custom onError function if provided', async () => {
+        const instance = getConfiguredInstance();
+
+        const req = new TestReq({ cookies: {}, method: 'GET' });
+
+        const onError = jest.fn();
+
+        await instance.userInfo(req, new TestRes({}), {
+          onError,
+          refresh: 'FORCE ERROR' as unknown as boolean,
+        });
+
+        expect(onError).toHaveBeenCalledTimes(1);
+      });
+
       it('should perform a userinfo request when customized through handler options and will override options', async () => {
         setupDiscovery({
           userinfo_endpoint: 'https://op.example.com/userinfo',
@@ -2125,6 +2166,24 @@ describe('MonoCloud Base Instance', () => {
             secure: true,
           },
         });
+      });
+
+      it('should execute custom onError function if provided', async () => {
+        const instance = getConfiguredInstance();
+
+        const req = new TestReq({
+          cookies: {},
+          method: 'GET',
+        });
+
+        const onError = jest.fn();
+
+        await instance.signOut(req, new TestRes({}), {
+          onError,
+          federatedLogout: 'FORCE ERROR' as unknown as boolean,
+        });
+
+        expect(onError).toHaveBeenCalledTimes(1);
       });
 
       it('should redirect to endSessionUrl (with base path)', async () => {

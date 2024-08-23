@@ -120,21 +120,24 @@ export const optionsSchema: Joi.ObjectSchema<MonoCloudOptionsBase> = Joi.object(
 
 export const signInOptionsSchema: Joi.ObjectSchema<SignInOptions> = Joi.object({
   returnUrl: stringOptional.uri({ allowRelative: true }),
-  authenticator: stringOptional,
+  authenticatorHint: stringOptional,
   loginHint: stringOptional,
   register: boolOptional,
   authParams: optionalAuthParamSchema,
+  onError: funcOptional,
 });
 
 export const callbackOptionsSchema: Joi.ObjectSchema<CallbackOptions> =
   Joi.object({
     userInfo: boolOptional,
     authParams: optionalAuthParamSchema,
+    onError: funcOptional,
   });
 
 export const userInfoOptionsSchema: Joi.ObjectSchema<UserInfoOptions> =
   Joi.object({
     refresh: boolOptional,
+    onError: funcOptional,
   });
 
 export const signOutOptionsSchema: Joi.ObjectSchema<SignOutOptions> =
@@ -142,6 +145,7 @@ export const signOutOptionsSchema: Joi.ObjectSchema<SignOutOptions> =
     post_logout_url: stringOptional.uri({ allowRelative: true }),
     federatedLogout: boolOptional,
     signOutParams: Joi.object().optional(),
+    onError: funcOptional,
   });
 
 export const getTokensOptionsSchema: Joi.ObjectSchema<GetTokensOptions> =

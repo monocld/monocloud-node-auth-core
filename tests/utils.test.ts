@@ -4,12 +4,12 @@ import {
   encryptData,
   ensureLeadingSlash,
   fromB64Url,
-  getAcrValues,
   getBoolean,
   getNumber,
   isAbsoluteUrl,
   isPresent,
   isSameHost,
+  isUserInGroup,
   now,
   removeTrailingSlash,
   toB64Url,
@@ -110,43 +110,6 @@ describe('toB64Url and fromB64Url', () => {
     const dec = fromB64Url(enc);
     expect(enc).toBe('U1qNPT6g-hJcksD4BaQ7bg');
     expect(dec).toBe(input);
-  });
-});
-
-describe('getAcrValues', () => {
-  it('should return an empty array when value is whitespace', () => {
-    const result = getAcrValues('        ');
-    expect(result).toEqual([]);
-  });
-
-  it('should return an empty array when value is undefined', () => {
-    const result = getAcrValues(undefined);
-    expect(result).toEqual([]);
-  });
-
-  it('should return an empty array when value is not a string', () => {
-    const result = getAcrValues(123 as any);
-    expect(result).toEqual([]);
-  });
-
-  it('should return an empty array when value is an empty string', () => {
-    const result = getAcrValues('');
-    expect(result).toEqual([]);
-  });
-
-  it('should return an array of trimmed non-empty strings when value is a string with multiple values', () => {
-    const result = getAcrValues(' value1  value2  value3 ');
-    expect(result).toEqual(['value1', 'value2', 'value3']);
-  });
-
-  it('should ignore leading and trailing whitespace for each value', () => {
-    const result = getAcrValues('  value1   value2   value3  ');
-    expect(result).toEqual(['value1', 'value2', 'value3']);
-  });
-
-  it('should filter out empty strings', () => {
-    const result = getAcrValues(' value1   value2   value3  ');
-    expect(result).toEqual(['value1', 'value2', 'value3']);
   });
 });
 
@@ -297,4 +260,75 @@ describe('isSameHost', () => {
     const result = isSameHost(url, urlToCheck);
     expect(result).toBe(false);
   });
+});
+
+describe('isUserInGroup()', () => {
+  it('should return true when the groups expected are empty', () => {
+    const result = isUserInGroup({ groups: ['test'] }, []);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when the users group claim in not a json array', () => {
+    const result = isUserInGroup({ groups: {} }, ['test']);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return true when the expected groups in not an array', () => {
+    const result = isUserInGroup({ groups: [] }, {} as string[]);
+
+    expect(result).toBe(true);
+  });
+
+  it('should be able to take in custom groups claim name', () => {
+    const result = isUserInGroup(
+      { custom_groups: ['test'] },
+      ['test'],
+      'custom_groups'
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it.each([
+    [[], ['test'], false, false],
+    [undefined, ['test'], false, false],
+    [['test'], ['test'], true, false],
+    [['test'], ['test', 'test_2'], true, false],
+    [['test '], ['test'], false, false],
+    [
+      ['2c17c510-ba14-43d5-a1cf-4bf9bd0523b8'],
+      ['2c17c510-ba14-43d5-a1cf-4bf9bd0523b8'],
+      true,
+      false,
+    ],
+    [
+      [{ id: '2c17c510-ba14-43d5-a1cf-4bf9bd0523b8', name: 'test' }],
+      ['2c17c510-ba14-43d5-a1cf-4bf9bd0523b8'],
+      true,
+      false,
+    ],
+    [
+      [{ id: '2c17c510-ba14-43d5-a1cf-4bf9bd0523b8', name: 'test' }],
+      ['test'],
+      true,
+      false,
+    ],
+    [['group1', 'group2'], ['group1', 'group3'], false, true],
+    [['group1', 'group2'], ['group1', 'group2'], true, true],
+    [['group1', 'group2', 'group3'], ['group1', 'group2'], true, true],
+  ])(
+    'should return expected result',
+    (userGroups, expectedGroups, expectedResult, shouldMatchAll) => {
+      const result = isUserInGroup(
+        { groups: userGroups },
+        expectedGroups,
+        undefined,
+        shouldMatchAll
+      );
+
+      expect(result).toBe(expectedResult);
+    }
+  );
 });

@@ -37,13 +37,7 @@ import {
 } from '../options/validation';
 import { MonoCloudValidationError } from '../errors/monocloud-validation-error';
 import dbug, { Debugger } from 'debug';
-import {
-  ensureLeadingSlash,
-  getAcrValues,
-  isAbsoluteUrl,
-  isSameHost,
-  now,
-} from '../utils';
+import { ensureLeadingSlash, isAbsoluteUrl, isSameHost, now } from '../utils';
 import { OAuthClient } from '../openid-client/oauth-client';
 
 export class MonoCloudBaseInstance {
@@ -171,13 +165,10 @@ export class MonoCloudBaseInstance {
       };
 
       // Set the Authenticator if passed down
-      const authenticator =
-        request.getQuery('authenticator') ?? opt.authenticator;
-      if (typeof authenticator === 'string' && authenticator) {
-        let acrValues = getAcrValues(params.acr_values);
-        acrValues = acrValues.filter(x => x.startsWith('authenticator:'));
-        acrValues.push(`authenticator:${authenticator}`);
-        params.acr_values = acrValues.join(' ');
+      const authenticatorHint =
+        request.getQuery('authenticator_hint') ?? opt.authenticatorHint;
+      if (typeof authenticatorHint === 'string' && authenticatorHint) {
+        params.authenticator_hint = authenticatorHint;
       }
 
       // Set the login hint if passed down
@@ -217,7 +208,11 @@ export class MonoCloudBaseInstance {
       // Redirect to the authorize url
       response.redirect(authUrl, 302);
     } catch (error) {
-      this.handleCatchAll(error, response);
+      if (typeof signInOptions?.onError === 'function') {
+        return signInOptions.onError(error);
+      } else {
+        this.handleCatchAll(error, response);
+      }
     }
 
     return response.done();
@@ -334,7 +329,11 @@ export class MonoCloudBaseInstance {
 
       response.redirect(this.options.appUrl);
     } catch (error) {
-      this.handleCatchAll(error, response);
+      if (typeof callbackOptions?.onError === 'function') {
+        return callbackOptions.onError(error);
+      } else {
+        this.handleCatchAll(error, response);
+      }
     }
 
     return response.done();
@@ -421,7 +420,11 @@ export class MonoCloudBaseInstance {
       // Return the Claims
       response.sendJson(session.user);
     } catch (error) {
-      this.handleCatchAll(error, response);
+      if (typeof userinfoOptions?.onError === 'function') {
+        return userinfoOptions.onError(error);
+      } else {
+        this.handleCatchAll(error, response);
+      }
     }
 
     return response.done();
@@ -510,7 +513,11 @@ export class MonoCloudBaseInstance {
       // Redirect the user to the end session endpoint
       response.redirect(url);
     } catch (error) {
-      this.handleCatchAll(error, response);
+      if (typeof signOutOptions?.onError === 'function') {
+        return signOutOptions.onError(error);
+      } else {
+        this.handleCatchAll(error, response);
+      }
     }
 
     return response.done();
