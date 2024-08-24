@@ -1,6 +1,6 @@
 {
   "name": "@monocloud/node-auth-core",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "MonoCloud NodeJS Authentication Core SDK",
   "keywords": [
     "monocloud",
@@ -41,17 +41,17 @@
     "cookie": "^0.6.0",
     "debug": "^4.3.6",
     "joi": "^17.13.3",
-    "jose": "^5.6.3",
+    "jose": "^5.7.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/cookie": "^0.6.0",
     "@types/debug": "4.1.12",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.12",
+    "@types/node": "^22.5.0",
     "@types/uuid": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.17.0",
-    "@typescript-eslint/parser": "^7.17.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-config-airbnb-typescript": "18.0.0",
@@ -64,8 +64,8 @@
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "timekeeper": "^2.3.1",
-    "ts-jest": "^29.2.3",
-    "type-fest": "^4.23.0",
+    "ts-jest": "^29.2.5",
+    "type-fest": "^4.25.0",
     "typescript": "^5.5.4"
   },
   "engines": {
