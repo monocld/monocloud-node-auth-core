@@ -28,7 +28,7 @@ export class MonoCloudStateService {
     );
 
     // Set the cookie
-    res.setCookie(
+    await res.setCookie(
       this.options.state.cookie.name,
       encrypted,
       this.getCookieOptions(overrideSameSite)
@@ -42,7 +42,7 @@ export class MonoCloudStateService {
     res: IMonoCloudCookieResponse
   ): Promise<MonoCloudState | undefined> {
     // Get the cookie
-    const cookie = req.getCookie(this.options.state.cookie.name);
+    const cookie = await req.getCookie(this.options.state.cookie.name);
 
     // Handle no cookie
     if (!cookie) {
@@ -61,7 +61,7 @@ export class MonoCloudStateService {
     const stateCookieValue: StateCookieValue = JSON.parse(decrypted);
 
     // Remove the cookie
-    res.setCookie(this.options.state.cookie.name, '', {
+    await res.setCookie(this.options.state.cookie.name, '', {
       ...this.getCookieOptions(),
       expires: new Date(0),
     });

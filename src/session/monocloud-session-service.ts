@@ -53,7 +53,7 @@ export class MonoCloudSessionService {
 
     // Handle no cookie value
     if (!cookieValue) {
-      this.deleteAllCookies(req, res);
+      await this.deleteAllCookies(req, res);
       return undefined;
     }
 
@@ -103,7 +103,7 @@ export class MonoCloudSessionService {
 
     // if there is no session in the store then delete the cookie
     if (!sessionObj) {
-      this.deleteAllCookies(req, res);
+      await this.deleteAllCookies(req, res);
       return undefined;
     }
 
@@ -138,7 +138,7 @@ export class MonoCloudSessionService {
 
     // Handle no cookie value
     if (!cookieValue) {
-      this.deleteAllCookies(req, res);
+      await this.deleteAllCookies(req, res);
       return false;
     }
 
@@ -177,7 +177,7 @@ export class MonoCloudSessionService {
 
     // Handle no cookie value
     if (!cookieValue) {
-      this.deleteAllCookies(req, res);
+      await this.deleteAllCookies(req, res);
       return;
     }
 
@@ -189,7 +189,7 @@ export class MonoCloudSessionService {
       }
     }
 
-    this.deleteAllCookies(req, res);
+    await this.deleteAllCookies(req, res);
   }
 
   private async validateSession(
@@ -233,7 +233,7 @@ export class MonoCloudSessionService {
       await this.options.session.store.delete(cookieValue.key);
     }
 
-    this.deleteAllCookies(req, res);
+    await this.deleteAllCookies(req, res);
 
     return false;
   }
@@ -244,7 +244,7 @@ export class MonoCloudSessionService {
     cookieValue: SessionCookieValue,
     session: MonoCloudSession
   ) {
-    const cookies = new Set(this.getRequestCookie(req)?.keys ?? []);
+    const cookies = new Set((await this.getRequestCookie(req))?.keys ?? []);
 
     // If no session store is present
     if (!this.options.session.store) {
@@ -303,7 +303,7 @@ export class MonoCloudSessionService {
           ? this.options.session.cookie.name
           : `${this.options.session.cookie.name}.${i}`;
 
-      res.setCookie(
+      await res.setCookie(
         cookieName,
         encryptedChunk,
         this.getCookieOptions(cookieExpiry)
@@ -313,16 +313,16 @@ export class MonoCloudSessionService {
     }
 
     // Delete all cookies which are not required anymore
-    cookies.forEach(key => {
-      res.setCookie(key, '', this.getCookieOptions(new Date(0)));
-    });
+    for (const cookie of cookies) {
+      await res.setCookie(cookie, '', this.getCookieOptions(new Date(0)));
+    }
   }
 
   private async getCookieData(
     req: IMonoCloudCookieRequest
   ): Promise<SessionCookieValue | undefined> {
     // Get all the cookies
-    const cookieData = this.getRequestCookie(req);
+    const cookieData = await this.getRequestCookie(req);
 
     // Handle no cookies
     if (!cookieData?.value) {
@@ -341,11 +341,11 @@ export class MonoCloudSessionService {
     return JSON.parse(data);
   }
 
-  private getRequestCookie(
+  private async getRequestCookie(
     req: IMonoCloudCookieRequest
-  ): { keys: string[]; value: string } | undefined {
+  ): Promise<{ keys: string[]; value: string } | undefined> {
     // Get all the cookies
-    const cookies = req.getAllCookies();
+    const cookies = await req.getAllCookies();
 
     // Handle no cookies
     if (!cookies.size) {
@@ -418,14 +418,18 @@ export class MonoCloudSessionService {
     };
   }
 
-  private deleteAllCookies(
+  private async deleteAllCookies(
     req: IMonoCloudCookieRequest,
     res: IMonoCloudCookieResponse
   ) {
-    this.getRequestCookie(req)
-      ?.keys.filter(x => x.startsWith(this.options.session.cookie.name))
-      .forEach(key => {
-        res.setCookie(key, '', this.getCookieOptions(new Date(0)));
-      });
+    const reqCookie = await this.getRequestCookie(req);
+
+    const cookies = reqCookie?.keys?.filter(x =>
+      x.startsWith(this.options.session.cookie.name)
+    );
+
+    for (const cookie of cookies ?? []) {
+      await res.setCookie(cookie, '', this.getCookieOptions(new Date(0)));
+    }
   }
 }

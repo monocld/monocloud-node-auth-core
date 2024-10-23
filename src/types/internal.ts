@@ -130,8 +130,8 @@ export interface EndSessionParameters {
 export type CookieOptions = CookieSerializeOptions;
 
 export interface IMonoCloudCookieRequest {
-  getCookie(name: string): string | undefined;
-  getAllCookies(): Map<string, string>;
+  getCookie(name: string): Promise<string | undefined>;
+  getAllCookies(): Promise<Map<string, string>>;
 }
 
 export interface MonoCloudRequest extends IMonoCloudCookieRequest {
@@ -145,7 +145,11 @@ export interface MonoCloudRequest extends IMonoCloudCookieRequest {
 }
 
 export interface IMonoCloudCookieResponse {
-  setCookie(cookieName: string, value: string, options: CookieOptions): void;
+  setCookie(
+    cookieName: string,
+    value: string,
+    options: CookieOptions
+  ): Promise<void>;
 }
 
 export interface MonoCloudResponse extends IMonoCloudCookieResponse {
