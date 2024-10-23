@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@monocloud/oauth4webapi": "2.11.1",
-    "cookie": "^0.6.0",
+    "cookie": "^0.7.0",
     "debug": "^4.3.6",
     "joi": "^17.13.3",
     "jose": "^5.7.0",
