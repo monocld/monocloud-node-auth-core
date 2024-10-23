@@ -95,9 +95,10 @@ export class TestRes implements MonoCloudResponse {
     cookieName: string,
     value: string,
     options: CookieSerializeOptions
-  ): void {
+  ): Promise<void> {
     this.throwIfDone();
     this.cookies[cookieName] = { value, options };
+    return Promise.resolve();
   }
 
   private throwIfDone() {
@@ -152,16 +153,16 @@ export class TestReq implements MonoCloudRequest {
     });
   }
 
-  getCookie(name: string): string | undefined {
-    return this.cookies?.[name]?.value;
+  getCookie(name: string): Promise<string | undefined> {
+    return Promise.resolve(this.cookies?.[name]?.value);
   }
 
-  getAllCookies(): Map<string, string> {
+  getAllCookies(): Promise<Map<string, string>> {
     const map = new Map();
     Object.keys(this.cookies ?? {}).forEach(key =>
       map.set(key, this.cookies?.[key].value)
     );
-    return map;
+    return Promise.resolve(map);
   }
 }
 
